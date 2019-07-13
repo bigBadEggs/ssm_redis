@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jee="http://www.springframework.org/schema/jee"
+	xsi:schemaLocation="http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-4.3.xsd
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.3.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd">
+	<!-- 扫描包 -->
+	<context:component-scan base-package="com.bigbadegg.service" />
+	<context:component-scan base-package="com.bigbadegg.dao" />
+	<context:component-scan base-package="com.bigbadegg.utils" />
+	<!-- 数据库配置文件 -->
+	<context:property-placeholder location="classpath:*.properties" />
+	<!-- 配置数据库连接池 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driver}" />
+		<property name="url" value="${jdbc.url}" />
+		<property name="username" value="${jdbc.username}" />
+		<property name="password" value="${jdbc.password}" />
+		<!-- 初始化连接大小 -->
+		<property name="initialSize" value="${initialSize}"></property>
+		<!-- 连接池最大数量 -->
+		<property name="maxActive" value="${maxActive}"></property>
+		<!-- 连接池最大空闲 -->
+		<property name="maxIdle" value="${maxIdle}"></property>
+		<!-- 连接池最小空闲 -->
+		<property name="minIdle" value="${minIdle}"></property>
+		<!-- 获取连接最大等待时间 -->
+		<property name="maxWait" value="${maxWait}"></property>
+	</bean>
+
+	<!-- sqlsessionFactory配置 -->
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:mybatis-config.xml" />
+		<property name="mapperLocations" value="classpath:com/bigbadegg/mapper/*.xml" />
+	</bean>
+	<bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="basePackage" value="com.bigbadegg.dao" />
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	</bean>
+
+	<!-- 事务管理 -->
+	<bean id="txManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<!-- 注解的事务管理 -->
+	<tx:annotation-driven transaction-manager="txManager" />
+
+	<!-- 事务通知 -->
+	<!-- <tx:advice id="txAdvice" transaction-manager="txManager"> <tx:attributes> 
+		<tx:method name="insert*" propagation="REQUIRED" rollback-for="java.lang.Exception"/> 
+		<tx:method name="update*" propagation="REQUIRED" rollback-for="java.lang.Exception"/> 
+		<tx:method name="delete*" propagation="REQUIRED" rollback-for="java.lang.Exception"/> 
+		<tx:method name="save*" propagation="REQUIRED" rollback-for="java.lang.Exception"/> 
+		<tx:method name="add*" propagation="REQUIRED" rollback-for="java.lang.Exception"/> 
+		<tx:method name="remove*" propagation="REQUIRED"/> <tx:method name="get*" 
+		propagation="REQUIRED"/> <tx:method name="find*" propagation="REQUIRED"/> 
+		</tx:attributes> </tx:advice> -->
+
+	<!-- AOP事务管理 -->
+	<!-- <aop:config> <aop:pointcut expression="execution(* com.bigbadegg.service.*.*(..))" 
+		id="pointCut"/> <aop:advisor advice-ref="txAdvice" pointcut-ref="pointCut"/> 
+		</aop:config> -->
+
+	<!-- 注解的AOP管理 -->
+	<aop:aspectj-autoproxy proxy-target-class="true" />
+	<!-- AOP切面 -->
+	<bean id="LogAspect" class="com.bigbadegg.aspect.LogAspect" />
+
+</beans>

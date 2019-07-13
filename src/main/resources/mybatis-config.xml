@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration   
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"  
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- Mybatis配置文件很简单，只需要将实体类声明一个别名就可以了，工厂以及mapper文件扫描都交给spring管理。 -->
+	<typeAliases>
+		<package name="com.bigbadegg.entity" />
+	</typeAliases>
+</configuration>
